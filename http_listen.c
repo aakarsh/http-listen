@@ -15,10 +15,11 @@
 #include<sys/socket.h>
 #include<arpa/inet.h>
 
-#include <pcap/bpf.h>
+//#include <pcap/bpf.h>
+#include <linux/filter.h>
 
 //sudo tcpdump -A -dd -s 0 'tcp port 80 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)'
-struct bpf_insn tcp_filter [] = {
+struct sock_filter tcp_filter [] = {
 { 0x28, 0, 0, 0x0000000c },
 { 0x15, 27, 0, 0x000086dd },
 { 0x15, 0, 26, 0x00000800 },
@@ -73,9 +74,9 @@ int main(int argc , char* argv[]){
     perror("Socket Error");
     return 1;
   }
-  struct bpf_program fcode = {0};
-  fcode.bf_len = sizeof(tcp_filter) / sizeof(struct bpf_insn);
-  fcode.bf_insns = &tcp_filter[0];
+  struct sock_fprog fcode = {0};
+  fcode.len = sizeof(tcp_filter) / sizeof(struct sock_filter);
+  fcode.filter = &tcp_filter[0];
   
   setsockopt(sock_fd,SOL_SOCKET,SO_ATTACH_FILTER,&fcode,sizeof(fcode));
   
