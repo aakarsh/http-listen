@@ -1,0 +1,2 @@
+Code sample for simple client which listens for http messages using
+the berekely packet filter.
